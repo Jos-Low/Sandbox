@@ -47,9 +47,15 @@ export class Sand extends Particle {
     swap(other) {
         // TODO make sand fall under the water
     }
-
+    
     update(row, col) {
-        // TODO update sand
+        let newRow = row + 1
+
+        if (!moveParticle(row,col,row+1, col, this.swap)){
+            if (!moveParticle(row, col, newRow, col - 1, this.swap)) {
+                moveParticle(row, col, newRow, col + 1, this.swap)
+            }
+        }
     }
 }
 
