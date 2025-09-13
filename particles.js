@@ -45,7 +45,7 @@ export class Sand extends Particle {
     }
 
     swap(other) {
-        // TODO make sand fall under the water
+        return other.type == 'water';
     }
     
     update(row, col) {
@@ -69,5 +69,85 @@ export function checkParticleType(value) {
     if (value == "Sand") {
         return new Sand();
     } 
-    // TODO create new particles
+    
+    else if (value == "Water") {
+        return new Water();
+    }
+
+    else if (value == "Stone") {
+        return new Stone();
+    }
+
+    else if (value == "Dirt") {
+        return new Dirt();
+    }
+    return null;
+}
+// Water Particle
+export class Water extends Particle {
+    constructor() {
+        super();
+        this.color = "blue";
+        this.type = "water";
+    }
+
+    update(row, col) {
+        if (getParticle(row+1, col)?.type == "Dirt") {
+            setParticle(row+1, col, new Grass());
+            setParticle(row, col, null);
+            return;
+        }
+
+
+        if (getRandomInt(0, 2) && !getParticle(row+1, col)) {
+            moveParticle(row, col, row+1, col, super.swap);
+        }
+
+        if (getRandomInt(0,1) && !getParticle(row, col+1)) {
+            moveParticle(row, col, row, col+1, super.swap);
+        }
+
+        if (!getRandomInt(0, 4) && !getParticle(row+1, col+1)) {
+            moveParticle(row, col, row+1, col+1, super.swap);       // Diagonal right
+        }
+
+        if (!getRandomInt(0, 4) && !getParticle(row+1, col-1)) {
+            moveParticle(row, col, row+1, col-1, super.swap);       // Diagonal left
+        }
+
+        if (!getRandomInt(0,10) && !getParticle(row-1, col)) {
+            moveParticle(row, col, row-1, col, super.swap);
+        }
+
+        else if (!getParticle(row, col-1)) {
+            moveParticle(row, col, row, col-1, super.swap);
+        }
+    }
+}
+
+// Stone Particle
+export class Stone extends Particle {
+    constructor() {
+        super();
+        this.color = "gray";
+        this.type = "Stone";
+    }
+}
+
+// Dirt Particle
+export class Dirt extends Sand {
+    constructor() {
+        super();
+        this.color = "brown";
+        this.type = "Dirt";
+    }
+}
+
+// Grass
+export class Grass extends Sand {
+    constructor() {
+        super();
+        this.color = "green";
+        this.type = "Grass"
+    }
 }

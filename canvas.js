@@ -193,12 +193,22 @@ export function moveParticle(row, col, newRow, newCol, swap) {
     if (!checkBounds(row, col) || !checkBounds(newRow, newCol)){
         return false;
     }
-    if (!getParticle(newRow,newCol)){
-        grid[newRow][newCol] = grid[row][col];
-        grid[row][col] = null
-        return true;
+    if (getParticle(newRow,newCol)){
+
+        if (swap && swap(getParticle(newRow, newCol))) {
+            const temp = grid[newRow][newCol];
+            grid[newRow][newCol] = grid[row][col];
+            grid[row][col] = temp;
+            return true;
+        }
+        else {
+            return false;
+        }
     }
-    return false;
+
+    grid[newRow][newCol] = grid[row][col];
+    grid[row][col] = null;
+    return true;
 }
 
 /**
