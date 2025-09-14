@@ -103,12 +103,7 @@ export class Water extends Particle {
         this.color = "blue";
         this.type = "water";
     }
-
-    swap(other) {
-        return other.type == "steam";
-    }
     
-
     update(row, col) {
         if (getParticle(row+1, col)?.type == "Dirt") {
             setParticle(row+1, col, new Grass());
@@ -116,6 +111,10 @@ export class Water extends Particle {
             return;
         }
 
+        if (getParticle(row+1, col)?.type === "steam") {
+            moveParticle(row, col, row+1, col, () => true);
+            return;
+        }
 
         if (getRandomInt(0, 2) && !getParticle(row+1, col)) {
             moveParticle(row, col, row+1, col, this.swap);
@@ -232,14 +231,15 @@ export class Steam extends Particle {
         this.maxDuration = 850;
     }
 
-    swap(other) {
-        return other.type == 'water';
-    }
-
     update(row, col) {
         this.duration++;
         if (this.duration >= this.maxDuration) {
             setParticle(row, col, new Water());
+            return;
+        }
+
+        if (getParticle(row-1, col)?.type === "water") {
+            moveParticle(row, col, row-1, col, () => true);
             return;
         }
 
