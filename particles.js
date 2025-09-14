@@ -105,6 +105,7 @@ export function checkParticleType(value) {
 
 }
 // Water Particle
+// Water Particle
 export class Water extends Particle {
     constructor() {
         super();
@@ -124,31 +125,39 @@ export class Water extends Particle {
             return;
         }
 
-        if (getRandomInt(0, 2) && !getParticle(row+1, col)) {
+        if (!getParticle(row+1, col)) {
             moveParticle(row, col, row+1, col, this.swap);
+            return;
         }
 
-        if (getRandomInt(0,1) && !getParticle(row, col+1)) {
+        if (Math.random() <= .5) {
+            if (!getParticle(row, col+1)) {
             moveParticle(row, col, row, col+1, this.swap);
+            return;
+            }
         }
-
-        if (!getRandomInt(0, 4) && !getParticle(row+1, col+1)) {
-            moveParticle(row, col, row+1, col+1, this.swap);   
-        }
-
-        if (!getRandomInt(0, 4) && !getParticle(row+1, col-1)) {
-            moveParticle(row, col, row+1, col-1, this.swap);      
-        }
-
-        if (!getRandomInt(0,10) && !getParticle(row-1, col)) {
-            moveParticle(row, col, row-1, col, this.swap);
-        }
-
         else if (!getParticle(row, col-1)) {
             moveParticle(row, col, row, col-1, this.swap);
+            return;
+        }
+
+        if (!getParticle(row+1, col+1)) {
+            moveParticle(row, col, row+1, col+1, this.swap);   
+            return;
+        }
+
+        if (!getParticle(row+1, col-1)) {
+            moveParticle(row, col, row+1, col-1, this.swap);      
+            return;
+        }
+
+        if (Math.random() < 0.1 && !getParticle(row-1, col)) {
+            moveParticle(row, col, row-1, col, this.swap);
+            return;
         }
     }
 }
+
 
 // Stone Particle
 export class Stone extends Particle {
@@ -181,7 +190,11 @@ export class Dirt extends Sand {
 export class Grass extends Sand {
     constructor() {
         super();
-        this.color = "green";
+        let grassShade = "green";
+        if (Math.random() <= 0.5) {
+            grassShade = "limegreen";
+        }
+        this.color = grassShade;
         this.type = "grass"
     }
 }
@@ -240,7 +253,11 @@ export class Fire extends Particle {
 export class Wood extends Stone {
     constructor() {
         super();
-        this.color = "saddlebrown";
+        let woodShade = "brown";
+        if (Math.random() < 0.1) {
+            woodShade = "burlywood";
+        }
+        this.color = woodShade;
         this.type = "wood";
     }
 }
@@ -249,19 +266,18 @@ export class Wood extends Stone {
 export class Steam extends Particle {
     constructor() {
         super();
-        this.color = "gray";
+        this.color = "lightgray";
         this.type = "steam";
         this.duration = 0;
-        this.maxDuration = 850;
+        this.maxDuration = 1000;
     }
 
     update(row, col) {
         this.duration++;
-        if (this.duration >= this.maxDuration) {
+        if (this.duration >= this.maxDuration && Math.random() <= 0.8) {
             setParticle(row, col, new Water());
             return;
         }
-
         if (getParticle(row-1, col)?.type === "water") {
             moveParticle(row, col, row-1, col, () => true);
             return;
@@ -290,7 +306,26 @@ export class Oil extends Water {
     constructor() {
         super();
         this.color = "black";
-        this.type = "oil"
+        this.type = "oil";
+    }
+
+    update(row, col) {
+        if (getParticle(row-1, col)?.type === "water") {
+            moveParticle(row, col, row-1, col, () => true);
+            return;
+        }
+        if (Math.random() <= .5) {
+            if (getParticle(row, col+1)?.type === "water") {
+                moveParticle(row, col, row, col+1, () => true);
+                return;
+            }
+        }
+        else if (getParticle(row, col-1)?.type === "water") {
+                moveParticle(row, col, row, col-1, () => true);
+                return;
+            }
+
+        super.update(row, col);
     }
 }
 
@@ -298,45 +333,61 @@ export class Oil extends Water {
 export class Explosive extends Particle {
     constructor() {
         super();
-        this.color = "red";
+        let explosiveShade = "red";
+        if (Math.random() <= 0.3) {
+            explosiveShade = "firebrick";
+            if (Math.random() <= 0.1) {
+                explosiveShade = "black";
+            }
+        }
+        this.color = explosiveShade;
         this.type = "explosive";
     }
 
-    update(row, col) {
-        const directions = [[-1, 0], [-1, -1], [-1, 1], [0, -1], [0, 1], [1, 0], [1, -1], [1, 1]];
+update(row, col) {
+        const directions = [
+            [-1, 0], [-1, -1], [-1, 1],
+            [0, -1], [0, 1],
+            [1, 0], [1, -1], [1, 1]
+        ];
 
-        for (let [dRow, dCol] of directions) 
-        {
-            const newRow = row + dRow;
-            const newCol = col + dCol;
+        let touchingFire = false;
+        for (let [dRow, dCol] of directions) {
+            const nRow = row + dRow;
+            const nCol = col + dCol;
+            if (!checkBounds(nRow, nCol)) continue;
+            const neighbor = getParticle(nRow, nCol);
+            if (neighbor?.type === "fire") {
+                touchingFire = true;
+                break;
+            }
+        }
 
-            if (!checkBounds(newRow, newCol)) continue; 
-            const contact = getParticle(newRow, newCol)
-            
+        if (!touchingFire) return; 
 
-            if (contact?.type === "fire") 
-                {
-                const radius = 5;
-                for (let dRow = -radius; dRow <= radius; dRow++) 
-                    {
+        const radius = 7;
 
-                    for (let dCol = -radius; dCol <= radius; dCol++) 
-                        {
-                        const newRow = row + dRow;
-                        const newCol = col + dCol;
+        // Loop over square radius
+        for (let dRow = -radius; dRow <= radius; dRow++) {
+            for (let dCol = -radius; dCol <= radius; dCol++) {
+                const nRow = row + dRow;
+                const nCol = col + dCol;
 
-                        if (!checkBounds(newRow, newCol)) continue;
+                if (!checkBounds(nRow, nCol)) continue;
 
-                        const target = getParticle(newRow, newCol);
+                // Create circle radius
+                const distance = Math.sqrt(dRow * dRow + dCol * dCol);
+                const randomness = Math.random() * 1.5; 
+                if (distance + randomness <= radius) {
+                    const target = getParticle(nRow, nCol);
 
-                        if (!target || target.type !== "explosive") 
-                            {
-                            setParticle(newRow, newCol, new Fire());
-                            }
-                        }
+                    // Destroy other blocks (anything that is not an explosive)
+                    if (!target || target.type !== "explosive") {
+                        setParticle(nRow, nCol, new Fire());
+                        setParticle(row, col, null);
                     }
-                setParticle(row, col, null);
                 }
+            }
         }
     }
 }

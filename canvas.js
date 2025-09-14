@@ -116,6 +116,9 @@ export function createParticle(mousePosition) {
         if (!existing || existing.type === "water" || existing.type === "steam" || existing.type === "oil") {
             setParticle(row, col, checkParticleType(value));
         }
+        if (existing?.type === "explosive" && value === "fire") {
+            setParticle(row, col, new Fire());
+        }
 
         // Recursion to make brush a circle (size is radius)
         if (size > 1) {
