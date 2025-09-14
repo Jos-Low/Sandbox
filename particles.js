@@ -40,7 +40,9 @@ class Particle {
 export class Sand extends Particle {
     constructor() {
         super();
-        this.color = "orange";
+        const sandShades = ["#FFA500", "#FFB347", "#FFCC66", "#FFD27F", "#FFE0A3"];
+        const randomIndex = Math.floor(Math.random() * sandShades.length);
+        this.color = sandShades[randomIndex];
         this.type = "sand";
     }
 
@@ -65,6 +67,7 @@ export class Sand extends Particle {
  * @param {string} value 
  * @returns 
  */
+
 export function checkParticleType(value) {
     if (value == "Sand") {
         return new Sand();
@@ -80,6 +83,10 @@ export function checkParticleType(value) {
 
     else if (value == "Dirt") {
         return new Dirt();
+    }
+
+    else if (value == "Fire") {
+        return new Fire();
     }
     return null;
 }
@@ -138,16 +145,43 @@ export class Stone extends Particle {
 export class Dirt extends Sand {
     constructor() {
         super();
-        this.color = "brown";
+        const dirtShades = ["#5D4037","#6D4C41","#795548","#8D6E63","#804422cb","#272626ff"];
+        const randomIndex = Math.floor(Math.random() * dirtShades.length);
+        this.color = dirtShades[randomIndex];
         this.type = "Dirt";
     }
 }
 
-// Grass
+// Grass Particle
 export class Grass extends Sand {
     constructor() {
         super();
         this.color = "green";
         this.type = "Grass"
     }
+}
+
+// Fire Particle
+export class Fire extends Particle {
+    constructor() {
+        super();
+        this.color = "red";
+        this.type = "Fire";
+        this.duration = 0;
+        this.maxDuration = 10;
+    }
+
+    update(row, col) {
+        this.duration++;
+
+        if (this.duration >= this.maxDuration) {
+            setParticle(row, col, null);
+            return;
+        }
+
+        if (!getParticle(row-1, col)) {
+            moveParticle(row, col, row-1, col, this.swap);
+        }
+    }
+
 }
