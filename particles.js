@@ -116,6 +116,10 @@ export class Water extends Particle {
             return;
         }
 
+        if (getParticle(row+1, col)?.type === "steam") {
+            moveParticle(row, col, row+1, col, () => true);
+            return;
+        }
 
         if (getRandomInt(0, 2) && !getParticle(row+1, col)) {
             moveParticle(row, col, row+1, col, this.swap);
@@ -230,10 +234,6 @@ export class Steam extends Particle {
         this.type = "steam";
         this.duration = 0;
         this.maxDuration = 850;
-    }
-
-    swap(other) {
-        return other.type == 'water';
     }
 
     update(row, col) {
