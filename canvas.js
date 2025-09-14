@@ -111,7 +111,11 @@ export function createParticle(mousePosition) {
             return;
         }
         // Create a new particle and assign it to (row, col)
-        grid[row][col] = checkParticleType(value);
+        const existing = getParticle(row, col);
+        // Only place particle if the cell is empty or matches some specific type(s)
+        if (!existing || existing.type === "water" || existing.type === "steam" || existing.type === "oil") {
+            setParticle(row, col, checkParticleType(value));
+        }
 
         // Recursion to make brush a circle (size is radius)
         if (size > 1) {

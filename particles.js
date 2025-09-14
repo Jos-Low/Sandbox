@@ -47,9 +47,9 @@ export class Sand extends Particle {
     }
 
     swap(other) {
-        return other.type == 'water';
+        return other.type == 'water' || other.type == 'oil';
     }
-    
+
     update(row, col) {
         let newRow = row + 1
 
@@ -94,7 +94,15 @@ export function checkParticleType(value) {
     else if (value == "Steam") {
         return new Steam();
     }
+    else if (value == "Oil") {
+        return new Oil();
+    }
+    else if (value == "Explosive") {
+        return new Explosive();
+    }
     return null;
+
+
 }
 // Water Particle
 export class Water extends Particle {
@@ -105,7 +113,7 @@ export class Water extends Particle {
     }
     
     update(row, col) {
-        if (getParticle(row+1, col)?.type == "Dirt") {
+        if (getParticle(row+1, col)?.type === "dirt") {
             setParticle(row+1, col, new Grass());
             setParticle(row, col, null);
             return;
@@ -146,7 +154,14 @@ export class Water extends Particle {
 export class Stone extends Particle {
     constructor() {
         super();
-        this.color = "gray";
+        let stoneShade
+        if (Math.random() < .8) {
+            stoneShade = "gray";
+        }
+        else {
+            stoneShade = "darkgray";
+        }
+        this.color = stoneShade;
         this.type = "stone";
     }
 }
@@ -184,19 +199,28 @@ export class Fire extends Particle {
     }
 
     update(row, col) {
-    const directions = [
-        [ -1, 0 ], [ -1, -1 ], [ -1, 1 ], [ 0, -1 ], [ 0, 1 ]];
+        const directions = [[-1, 0], [-1, -1], [-1, 1], [0, -1], [0, 1], [1, 0], [1, -1], [1, 1]];
 
-    for (let [dRow, dCol] of directions) {
-        const newRow = row + dRow;
-        const newCol = col + dCol;
-        const target = getParticle(newRow, newCol);
+        for (let [dRow, dCol] of directions) {
+            const newRow = row + dRow;
+            const newCol = col + dCol;
 
-        if (target?.type === "wood" && Math.random() < 0.1) { 
-            setParticle(newRow, newCol, new Fire());
+            if (!checkBounds(newRow, newCol)) continue; 
+
+            const target = getParticle(newRow, newCol);
+
+            if (target?.type === "wood" && Math.random() < 0.09) { 
+                setParticle(newRow, newCol, new Fire());
+            }
+
+            if (target?.type === "oil") {
+                setParticle(newRow, newCol, new Fire());
+            }
+
+            if (target?.type === "water") {
+                setParticle(newRow, newCol, new Steam());
+            }
         }
-
-    }
 
         this.duration++;
 
@@ -257,6 +281,62 @@ export class Steam extends Particle {
         }
         if (!getRandomInt(0,2) && !getParticle(row, col-1)) {
             moveParticle(row, col, row, col-1, this.swap);
+        }
+    }
+}
+
+// Oil Particle
+export class Oil extends Water {
+    constructor() {
+        super();
+        this.color = "black";
+        this.type = "oil"
+    }
+}
+
+// Explosive
+export class Explosive extends Particle {
+    constructor() {
+        super();
+        this.color = "red";
+        this.type = "explosive";
+    }
+
+    update(row, col) {
+        const directions = [[-1, 0], [-1, -1], [-1, 1], [0, -1], [0, 1], [1, 0], [1, -1], [1, 1]];
+
+        for (let [dRow, dCol] of directions) 
+        {
+            const newRow = row + dRow;
+            const newCol = col + dCol;
+
+            if (!checkBounds(newRow, newCol)) continue; 
+            const contact = getParticle(newRow, newCol)
+            
+
+            if (contact?.type === "fire") 
+                {
+                const radius = 5;
+                for (let dRow = -radius; dRow <= radius; dRow++) 
+                    {
+
+                    for (let dCol = -radius; dCol <= radius; dCol++) 
+                        {
+                        const newRow = row + dRow;
+                        const newCol = col + dCol;
+
+                        if (!checkBounds(newRow, newCol)) continue;
+
+                        const target = getParticle(newRow, newCol);
+
+                        if (!target || target.type !== "explosive") 
+                            {
+                            setParticle(newRow, newCol, new Fire());
+                            }
+                        }
+                    }
+                setParticle(row, col, null);
+                }
         }
     }
 }
