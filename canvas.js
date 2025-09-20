@@ -106,29 +106,36 @@ export function createParticle(mousePosition) {
     const value = particleType.value;
     const brushSize = parseInt(brushSlider.value);
     
-    const brushSpread = (row, col, size) => {
-        if (!checkBounds(row, col)) {
-            return;
-        }
-        // Create a new particle and assign it to (row, col)
-        const existing = getParticle(row, col);
-        // Only place particle if the cell is empty or matches some specific type(s)
-        if (!existing || existing.type === "water" || existing.type === "steam" || existing.type === "oil") {
-            setParticle(row, col, checkParticleType(value));
-        }
-        if (existing?.type === "explosive" && value === "fire") {
-            setParticle(row, col, new Fire());
-        }
-
-        // Recursion to make brush a circle (size is radius)
-        if (size > 1) {
-            size -= 1;
-            brushSpread(row+1, col, size);
-            brushSpread(row-1, col, size);
-            brushSpread(row, col+1, size);
-            brushSpread(row, col-1, size);
-        }
+const brushSpread = (row, col, size) => {
+    if (!checkBounds(row, col)) {
+        return;
     }
+
+    const existing = getParticle(row, col);
+    const newParticle = checkParticleType(value);
+
+    // Eraser removes anything
+    if (newParticle?.type === "eraser") {
+        setParticle(row, col, newParticle);
+    }
+    // Fire overwrites explosives
+    else if (existing?.type === "explosive" && newParticle?.type === "fire") {
+        setParticle(row, col, newParticle);
+    }
+    // Empty or fluid cells can always be overwritten
+    else if (!existing || ["water", "steam", "oil", "lava"].includes(existing.type)) {
+        setParticle(row, col, newParticle);
+    }
+
+    // Recursion to spread the brush
+    if (size > 1) {
+        size -= 1;
+        brushSpread(row + 1, col, size);
+        brushSpread(row - 1, col, size);
+        brushSpread(row, col + 1, size);
+        brushSpread(row, col - 1, size);
+    }
+};
 
     // Recursive function that spreads out in a circle
     brushSpread(row, col, brushSize);

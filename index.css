@@ -1,5 +1,5 @@
 #canvas {
-    border: 1px solid black;
+    border: 5px solid rgb(255, 0, 0);
     background-color: whitesmoke;
 }
 
@@ -9,23 +9,22 @@
    align-items: center;
    flex-direction: column;
    min-height: 100vh;
-   background-color: rgb(39, 29, 29);
+   background: linear-gradient(360deg, rgb(39, 29, 29), rgb(62, 59, 59));
 }
 
 .buttons {
-    display:flex;
-    align-items: center;
-    gap: 10px
+  display:flex;
+  align-items: center;
+  gap: 10px
 }
 
 p, label {
-    color: rgb(168, 165, 165);
-    font-style: bold;
-    font-size: 2rem;
-    font-family: 'Russo One', sans-serif;
+  color: rgb(168, 165, 165);
+  font-style: bold;
+  font-size: 2rem;
+  font-family: 'Russo One', sans-serif;
 }
 
-/* Apply Russo One to buttons and select */
 button, select {
   font-family: 'Russo One', sans-serif;
   font-size: 1.1em;
@@ -36,10 +35,9 @@ button, select {
   transition: all 0.25s ease-in-out;
 }
 
-/* Clear Screen button style */
 #clear-button {
-  background: linear-gradient(135deg, #ff416c, #ff4b2b);
-  color: white;
+  background: linear-gradient(135deg, #f21347, #ff0000);
+  color: black;
   box-shadow: 0 0 12px rgba(255, 65, 108, 0.7);
 }
 
@@ -48,7 +46,6 @@ button, select {
   box-shadow: 0 0 20px rgba(255, 65, 108, 1), 0 0 40px rgba(255, 75, 43, 0.7);
 }
 
-/* "Choose a Type" dropdown */
 #particle {
   background: #222;
   color: white;
@@ -72,18 +69,16 @@ input[type="range"] {
   border-radius: 5px;
 }
 
-/* The knob */
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #ff416c; /* knob color */
+  background: #ff416c; 
   cursor: pointer;
   transition: 0.3s;
 }
 
-/* Hover effect */
 input[type="range"]::-webkit-slider-thumb:hover {
   background: #ff4b2b;
   transform: scale(1.2);

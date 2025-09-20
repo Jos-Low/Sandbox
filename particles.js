@@ -100,11 +100,19 @@ export function checkParticleType(value) {
     else if (value == "Explosive") {
         return new Explosive();
     }
+    else if (value == "Lava") {
+        return new Lava();
+    }
+    else if (value == "Basalt") {
+        return new Basalt();
+    }
+    else if (value == "Eraser") {
+        return new Eraser();
+    }
     return null;
 
 
 }
-// Water Particle
 // Water Particle
 export class Water extends Particle {
     constructor() {
@@ -114,11 +122,6 @@ export class Water extends Particle {
     }
     
     update(row, col) {
-        if (getParticle(row+1, col)?.type === "dirt") {
-            setParticle(row+1, col, new Grass());
-            setParticle(row, col, null);
-            return;
-        }
 
         if (getParticle(row+1, col)?.type === "steam") {
             moveParticle(row, col, row+1, col, () => true);
@@ -183,8 +186,23 @@ export class Dirt extends Sand {
         const randomShade = Math.floor(Math.random() * dirtShades.length);
         this.color = dirtShades[randomShade];
         this.type = "dirt";
+        this.growth = 0;
+        this.maxGrowth = 50; 
+    }
+
+    update(row, col) {
+        if (getParticle(row-1, col)?.type === "water") {
+            this.growth += 1;
+        }
+
+        if (this.growth >= this.maxGrowth) {
+            setParticle(row, col, new Grass());
+        }
+
+        super.update(row, col);
     }
 }
+
 
 // Grass Particle
 export class Grass extends Sand {
@@ -195,9 +213,23 @@ export class Grass extends Sand {
             grassShade = "limegreen";
         }
         this.color = grassShade;
-        this.type = "grass"
+        this.type = "grass";
+    }
+
+    update(row, col) {
+        if (row > 0) {
+            const above = getParticle(row - 1, col);
+
+            if (above && above.type !== "water" && above.type !== "steam" && above.type !== "oil") {
+                setParticle(row, col, new Dirt());
+                return;
+            }
+        }
+
+        super.update(row, col);
     }
 }
+
 
 // Fire Particle
 export class Fire extends Particle {
@@ -253,8 +285,11 @@ export class Fire extends Particle {
 export class Wood extends Stone {
     constructor() {
         super();
-        let woodShade = "brown";
-        if (Math.random() < 0.1) {
+        let woodShade = "rgba(117, 67, 27, 0.82)";
+        if (Math.random() < 0.5) {
+            woodShade = "#5A381E";
+        }
+        else if (Math.random() < 0.1) {
             woodShade = "burlywood";
         }
         this.color = woodShade;
@@ -280,6 +315,14 @@ export class Steam extends Particle {
         }
         if (getParticle(row-1, col)?.type === "water") {
             moveParticle(row, col, row-1, col, () => true);
+            return;
+        }
+        else if (getParticle(row-1, col-1)?.type === "water") {
+            moveParticle(row, col, row-1, col-1, () => true);
+            return;
+        }
+        else if (getParticle(row-1, col+1)?.type === "water") {
+            moveParticle(row, col, row-1, col+1, () => true);
             return;
         }
 
@@ -365,7 +408,7 @@ update(row, col) {
 
         if (!touchingFire) return; 
 
-        const radius = 7;
+        const radius = 15;
 
         // Loop over square radius
         for (let dRow = -radius; dRow <= radius; dRow++) {
@@ -382,12 +425,80 @@ update(row, col) {
                     const target = getParticle(nRow, nCol);
 
                     // Destroy other blocks (anything that is not an explosive)
-                    if (!target || target.type !== "explosive") {
+                    if (!target || (target.type !== "explosive" && target.type !== "basalt")) {
                         setParticle(nRow, nCol, new Fire());
                         setParticle(row, col, null);
                     }
                 }
             }
         }
+    }
+}
+
+// Lava
+export class Lava extends Water {
+    constructor() {
+        super()
+        this.color = "orangered";
+        this.type = "lava"
+    }
+
+    update(row, col) {
+        const directions = [[-1, 0], [-1, -1], [-1, 1], [0, -1], [0, 1], [1, 0], [1, -1], [1, 1]];
+
+        for (let [dRow, dCol] of directions) {
+            const newRow = row + dRow;
+            const newCol = col + dCol;
+
+            if (!checkBounds(newRow, newCol)) continue; 
+
+            const target = getParticle(newRow, newCol);
+
+            if (target?.type === "wood" || target?.type === "oil" || target?.type === "explosive") { 
+                setParticle(newRow, newCol, new Fire());
+            }
+
+            if (target?.type === "water") {
+                setParticle(newRow, newCol, new Basalt());
+                if (!getParticle(newRow-1, newCol)) {
+                    setParticle(newRow, newCol, new Steam())
+                }
+            }
+
+        }
+
+        super.update(row, col)
+    }
+}
+
+// Basalt
+export class Basalt extends Stone {
+    constructor() {
+        super()
+        let basaltShade = "#1E1E1E";
+        if (Math.random() < 0.4) {
+            basaltShade = "black";
+        }
+        else if (Math.random() < 0.2) {
+            basaltShade = "#2B2B2B";
+        }
+        else if (Math.random() < 0.4) {
+            basaltShade = "darkslategray";
+        }
+        this.color = basaltShade;
+        this.type = "basalt";
+    }
+}
+
+// Eraser
+export class Eraser extends Particle {
+    constructor() {
+        super()
+        this.color = "red";
+        this.type = "eraser";
+    }
+
+    update(row, col) {
+        setParticle(row, col, null)
     }
 }
