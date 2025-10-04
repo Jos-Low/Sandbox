@@ -4,11 +4,11 @@ A dynamic, interactive web-based sandbox environment for experimenting with HTML
 
 💡 Features
 
-Live Coding Playground: Experiment with HTML, CSS, and JavaScript in real-time.
+Particles: Sand, Water, Stone, Dirt, Fire, Wood, Steam, Oil, Explosive, Lava, Basalt, and Eraser.
 
-Responsive Layout: Fully responsive design for desktop and mobile.
+Reactions: Most particles react with other particles differently, experiment to discover them!
 
-Dynamic Styling: Apply and preview CSS changes instantly.
+Responsive Layout: Fully responsive design for desktop.
 
 Modular JavaScript: Clean, structured JS code for easy extension and maintenance.
 
