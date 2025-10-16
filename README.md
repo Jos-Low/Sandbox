@@ -22,10 +22,6 @@ CSS3 – Responsive styling with modern layout techniques.
 
 JavaScript (ES6) – Interactive functionality and dynamic content.
 
-Optional enhancements if applicable:
-
-Local storage support for saving snippets
-
 Drag-and-drop interface for components
 
 Syntax highlighting with a lightweight library
